@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset=utf-8 />
+<title>JS Bin</title>
+</head>
+<body>
+  <script src="http://localhost:5000/realtime/client.js"></script>
+  <script>
+    var Logger = {
+        incoming: function(message, callback) {
+        console.log('incoming', message);
+        callback(message);
+      },
+      outgoing: function(message, callback) {
+        console.log('outgoing', message);
+        callback(message);
+      }
+    };
+    
+    var client = new Faye.Client('http://localhost:5000/realtime');
+    client.addExtension(Logger);
+    
+    var subscription = client.subscribe('/services/pusher', function(message) {
+      // handle message
+    }); 
+  </script>
+</body>
+</html>

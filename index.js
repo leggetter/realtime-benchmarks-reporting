@@ -2,10 +2,17 @@ var http = require('http'),
     faye = require('faye'),
     director = require('director');
 
+var SupportedChannelsExt = require( './SupportedChannelsExt' );
+
 var bayeux = new faye.NodeAdapter({mount: '/realtime', timeout: 45});
 var router = new director.http.Router();
 
 var server = http.createServer(function (req, res) {
+  req.chunks = [];
+  req.on( 'data', function ( chunk ) {
+    req.chunks.push( chunk.toString() );
+  } );
+
   router.dispatch(req, res, function (err) {
     if (err) {
       res.writeHead(500);
@@ -13,6 +20,7 @@ var server = http.createServer(function (req, res) {
       res.end( errorJson );
     }
   });
+
 });
 
 var knownServices = {
@@ -23,18 +31,20 @@ var knownServices = {
   'hydna' : {}
 };
 
+var servicesChannelPrefix = '/services/';
+var supportedChannnels = {};
+for( var service in knownServices ) {
+  supportedChannnels[ servicesChannelPrefix + service ];
+}
+
+var supportedChannelsExt = new SupportedChannelsExt( supportedChannnels );
+
 // Handle non-Bayeux requests
 bayeux.attach(server);
 
 var subscriptionCount = {};
 
 function getServiceName( channel ) {
-  if( channel.indexOf( '*' ) > 0 ) {
-    var wildcardMsg = 'wildcard subscriptions are not allowed';
-    console.error( wildcardMsg );
-    throw new Error( wildcardMsg );
-  }
-
   // "service" is a META channel in Faye and can't be used
   var match = /\/services\/(.*)/.exec( channel );
   var serviceName = ( match? match[ 1 ] : null );
@@ -80,10 +90,6 @@ bayeux.bind('disconnect', function(clientId) {
   console.log('[DISCONNECT] ' + clientId);
 } );
 
-// Start server
-var port = process.env.PORT || 5000;
-server.listen( port );
-
 // HTTP
 router.get( '/', function() {
   this.res.end('Home page');
@@ -95,10 +101,25 @@ router.get( '/stats', function() {
 } );
 
 router.post( '/latency/:service', function( service ) {
+  // TODO: Authentication - use a header
+
   var self = this;
   console.log( 'POST: "%s", Body: "%s"', service, JSON.stringify( this.req.body, null, 2 ) );
+
+  if( !knownServices[ service ] ) {
+    self.res.writeHead( 404 );
+    self.res.end();
+  }
+
+  bayeux.getClient().publish('/services/' + service, this.req.body );
 
   self.res.writeHead( 200 );
   self.res.end();
 
+} );
+
+// Start server
+var port = process.env.PORT || 5000;
+server.listen( port, function() {
+  console.log( 'listening on port %s', port );
 } );
