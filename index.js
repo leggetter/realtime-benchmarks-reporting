@@ -48,6 +48,41 @@ bayeux.attach(server);
 
 var subscriptionCount = {};
 
+function incrementSubscribe( serviceName ) {
+  if( !subscriptionCount[ serviceName ] ) {
+    subscriptionCount[ serviceName ] = 0;
+  }
+  ++subscriptionCount[ serviceName ];
+
+  console.log( 'Subscribers for "%s" increased to %s', serviceName, subscriptionCount[ serviceName ] );
+}
+
+function decrementSubscribe( serviceName ) {
+  if( !subscriptionCount[ serviceName ] ) {
+    console.error( 'unexpected unsubscribe. Channel "%s" not found in subscription list.', serviceName );
+    return;
+  }
+
+  if( !subscriptionCount[ serviceName ] ) {
+    subscriptionCount[ serviceName ] = 0;
+  }
+  --subscriptionCount[ serviceName ];
+
+  console.log( 'Subscribers for "%s" decreased to %s', serviceName, subscriptionCount[ serviceName ] );
+}
+
+function subscribeAll() {
+  for( var service in knownServices ) {
+    incrementSubscribe( service );
+  }
+}
+
+function unsubscribeAll() {
+  for( var service in knownServices ) {
+    decrementSubscribe( service );
+  }
+}
+
 function getServiceName( channel ) {
   // "service" is a META channel in Faye and can't be used
   var match = /\/services\/(.*)/.exec( channel );
@@ -66,24 +101,25 @@ function getServiceName( channel ) {
 function subscribe( clientId, channel ) {
   console.log('[SUBSCRIBE] ' + clientId + ' -> ' + channel );
 
-  var serviceName = getServiceName( channel );
-
-  if( !subscriptionCount[ serviceName ] ) {
-    subscriptionCount[ serviceName ] = 0;
+  if( channel === '/services/*' ) {
+    subscribeAll();
   }
-  ++subscriptionCount[ serviceName ];
+  else {
+    var serviceName = getServiceName( channel );
+    incrementSubscribe( serviceName );
+  }
 }
 
 function unsubscribe( clientId, channel ) {
   console.log('[UNSUBSCRIBE] ' + clientId + ' -> ' + channel);
 
-  var serviceName = getServiceName( channel );
-
-  if( !subscriptionCount[ serviceName ] ) {
-    console.error( 'unexpected unsubscribe. Channel "%s" not found in subscription list.', channel );
-    return;
+  if( channel === '/services/*' ) {
+    unsubscribeAll();
   }
-  --subscriptionCount[ serviceName ];
+  else {
+    var serviceName = getServiceName( channel );
+    decrementSubscribe( serviceName );
+  }
 }
 
 bayeux.bind( 'subscribe', subscribe );
