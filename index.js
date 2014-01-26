@@ -28,7 +28,8 @@ var knownServices = {
   'pubnub' : {},
   'realtimeco' : {},
   'firebase' : {},
-  'hydna' : {}
+  'hydna' : {},
+  'goinstant': {}
 };
 
 var servicesChannelPrefix = '/services/';
@@ -92,9 +93,11 @@ bayeux.bind('disconnect', function(clientId) {
 
 function publishResult( service, result ) {
   if( !knownServices[ service ] ) {
-    console.error( 'Attempt to publish result for unknown service "%s"', service );
+    console.error( 'Not publishing result for unknown service "%s"', service );
     return;
   }
+
+  console.log( 'Publishing result for service "%s"', service );
 
   bayeux.getClient().publish('/services/' + service, result );
 }
@@ -109,11 +112,11 @@ router.get( '/stats', function() {
   this.res.end( jsonStats );
 } );
 
-router.post( '/latency', function( service ) {
+router.post( '/latency', function() {
   // TODO: Authentication - use a header
 
   var self = this;
-  console.log( 'POST: "%s", Body: "%s"', service, JSON.stringify( this.req.body, null, 2 ) );
+  console.log( 'POST: Body: "%s"', JSON.stringify( this.req.body, null, 2 ) );
 
   var latencyResults = this.req.body.latencyResults;
   for( var serviceName in latencyResults ) {
