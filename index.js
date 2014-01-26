@@ -115,16 +115,23 @@ router.get( '/stats', function() {
 router.post( '/latency', function() {
   // TODO: Authentication - use a header
 
-  var self = this;
-  console.log( 'POST: Body: "%s"', JSON.stringify( this.req.body, null, 2 ) );
+  try {
+    var self = this;
+    console.log( 'POST: Body: "%s"', JSON.stringify( this.req.body, null, 2 ) );
 
-  var latencyResults = this.req.body.latencyResults;
-  for( var serviceName in latencyResults ) {
-    publishResult( serviceName.toLowerCase(), latencyResults[ serviceName ] );
+    var latencyResults = this.req.body.latencyResults;
+    for( var serviceName in latencyResults ) {
+      publishResult( serviceName.toLowerCase(), latencyResults[ serviceName ] );
+    }
+
+    self.res.writeHead( 200 );
+    self.res.end();
   }
-
-  self.res.writeHead( 200 );
-  self.res.end();
+  catch( e ) {
+    console.error( e );
+    self.res.writeHead( 500 );
+    self.res.end( e.toString() );
+  }
 
 } );
 
