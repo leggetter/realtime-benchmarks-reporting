@@ -5,8 +5,28 @@
 <title>JS Bin</title>
 </head>
 <body>
-  <script src="http://localhost:5000/realtime/client.js"></script>
+  <table>
+    <thead>
+      <tr>
+        <td>Service</td>
+        <td colspan="5"></td>
+      </tr>
+    </thead>
+    <tbody data-bind="foreach: latencyResults">
+      <tr>
+        <td data-bind="text: name"></td>
+        <!-- ko foreach: latency -->
+          <td data-bind="text: $data"></td>
+        <!-- /ko -->
+      </tr>
+    </tbody>
+  </table>
+        
+  
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/knockout/2.3.0/knockout-min.js"></script>
+  <script src="http://realtime-latency-stats.herokuapp.com/realtime/client.js"></script>
   <script>
+    
     var Logger = {
         incoming: function(message, callback) {
         console.log('incoming', message);
@@ -18,12 +38,64 @@
       }
     };
     
-    var client = new Faye.Client('http://localhost:5000/realtime');
-    client.addExtension(Logger);
+    function average( arr ) {
+      var i = arr.length,
+      sum = 0;
+      while (i--) {
+        sum = sum + arr[i];
+      }
+      return ( sum / arr.length );
+    }
     
-    var subscription = client.subscribe('/services/pusher', function(message) {
-      // handle message
-    }); 
+    var LatencyViewModel = function() {
+      
+      this.services = [
+        'firebase',
+        'goinstant',
+        'hydna',
+        'pubnub',
+        'pusher',
+        'realtimeco'
+      ];
+
+      var latencyResults = [];
+      this.services.forEach( function( service ) {
+        latencyResults.push(
+          { name: service, latency: ko.observableArray( new Array( 5 ) ) }
+        );
+      } );
+      
+      console.log( latencyResults );
+
+      this.latencyResults = ko.observableArray( latencyResults );
+      console.log( 'latencyResults', this.latencyResults.forEach );
+    };
+    LatencyViewModel.prototype.updateLatency = function( service, data ) {
+      console.log( arguments );
+      ko.utils.arrayForEach( this.latencyResults(), function( result, index ) {
+        if( result.name === service ) {
+          result.latency.push( average( data ) );
+          console.log( result.latency );
+          // TODO: restrict number of latency results
+        }
+      }, this );
+    };
+    
+    var latencyViewModel = new LatencyViewModel();
+    ko.applyBindings( latencyViewModel );
+
+    
+    var client = new Faye.Client('http://realtime-latency-stats.herokuapp.com/realtime');
+    client.addExtension(Logger); 
+      
+    function latencyResultReceived( message ) {
+      var channel = message.channel;
+      var data = message.data;
+      var service = channel.substring( ( channel.lastIndexOf( '/' ) + 1 ) );
+      latencyViewModel.updateLatency( service, data );
+    }
+    
+    var subscription = client.subscribe('/services/*', latencyResultReceived );
   </script>
 </body>
 </html>
