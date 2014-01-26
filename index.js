@@ -33,12 +33,15 @@ var knownServices = {
 };
 
 var servicesChannelPrefix = '/services/';
-var supportedChannnels = {};
+var supportedChannels = {};
 for( var service in knownServices ) {
-  supportedChannnels[ servicesChannelPrefix + service ];
+  supportedChannels[ servicesChannelPrefix + service ] = true;
 }
+// allow wildcard
+supportedChannels[ servicesChannelPrefix + '*' ] = true;
 
-var supportedChannelsExt = new SupportedChannelsExt( supportedChannnels );
+var supportedChannelsExt = new SupportedChannelsExt( supportedChannels );
+bayeux.addExtension( supportedChannelsExt );
 
 // Handle non-Bayeux requests
 bayeux.attach(server);
