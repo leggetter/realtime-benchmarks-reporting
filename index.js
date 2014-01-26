@@ -90,6 +90,15 @@ bayeux.bind('disconnect', function(clientId) {
   console.log('[DISCONNECT] ' + clientId);
 } );
 
+function publishResult( service, result ) {
+  if( !knownServices[ service ] ) {
+    console.error( 'Attempt to publish result for unknown service "%s"', service );
+    return;
+  }
+
+  bayeux.getClient().publish('/services/' + service, result );
+}
+
 // HTTP
 router.get( '/', function() {
   this.res.end('Home page');
@@ -100,18 +109,16 @@ router.get( '/stats', function() {
   this.res.end( jsonStats );
 } );
 
-router.post( '/latency/:service', function( service ) {
+router.post( '/latency', function( service ) {
   // TODO: Authentication - use a header
 
   var self = this;
   console.log( 'POST: "%s", Body: "%s"', service, JSON.stringify( this.req.body, null, 2 ) );
 
-  if( !knownServices[ service ] ) {
-    self.res.writeHead( 404 );
-    self.res.end();
+  var latencyResults = this.req.body.latencyResults;
+  for( var serviceName in latencyResults ) {
+    publishResult( serviceName.toLowerCase(), latencyResults[ serviceName ] );
   }
-
-  bayeux.getClient().publish('/services/' + service, this.req.body );
 
   self.res.writeHead( 200 );
   self.res.end();
