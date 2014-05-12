@@ -2,7 +2,7 @@ var http = require('http'),
     faye = require('faye'),
     director = require('director');
 
-var AUTH_HEADER_NAME = 'X-RTAUTH';
+var AUTH_HEADER_NAME = 'X-RTAUTH'.toLowerCase();
 var RT_AUTH_HEADER = process.env.RT_AUTH_HEADER;
 if( !RT_AUTH_HEADER ) {
   throw new Error( 'RT_AUTH_HEADER environmental variable not found.' +
