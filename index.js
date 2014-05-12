@@ -169,7 +169,7 @@ router.post( '/latency', function() {
     var authHeader = this.req.headers[ AUTH_HEADER_NAME ];
     if( authHeader !== RT_AUTH_HEADER ) {
       self.res.writeHead( 401 );
-      self.res.end( 'Not authorized' );
+      self.res.end( 'Not authorized: ' + authHeader );
     }
 
     console.log( 'POST: Body: "%s"', JSON.stringify( this.req.body, null, 2 ) );
