@@ -166,14 +166,14 @@ router.get( '/stats', function() {
 router.post( '/latency', function() {
   var self = this;
   try {
-    console.log( 'headers', self.req.header );
+    console.log( 'req', self.req );
     var authHeader = self.req.headers[ AUTH_HEADER_NAME ];
     if( authHeader !== RT_AUTH_HEADER ) {
       self.res.writeHead( 401 );
       self.res.end( 'Not authorized: ' + authHeader );
     }
 
-    console.log( 'POST: Body: "%s"', JSON.stringify( this.req.body, null, 2 ) );
+    // console.log( 'POST: Body: "%s"', JSON.stringify( this.req.body, null, 2 ) );
 
     var latencyResults = this.req.body.latencyResults;
     for( var serviceName in latencyResults ) {

@@ -1,11 +1,16 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset=utf-8 />
-<title>JS Bin</title>
+  <meta charset=utf-8 />
+  <title>JS Bin</title>
+  <style>
+    #results td.result {
+      text-align: right;
+    }
+  </style>
 </head>
 <body>
-  <table>
+  <table id="results">
     <thead>
       <tr>
         <td>Service</td>
@@ -16,7 +21,7 @@
       <tr>
         <td data-bind="text: name"></td>
         <!-- ko foreach: latency -->
-          <td data-bind="text: $data"></td>
+          <td class="result" data-bind="text: $data"></td>
         <!-- /ko -->
       </tr>
     </tbody>
@@ -44,7 +49,7 @@
       while (i--) {
         sum = sum + arr[i];
       }
-      return ( sum / arr.length );
+      return ( sum / arr.length ).toFixed( 2 );
     }
 
     var LatencyViewModel = function() {
