@@ -2,6 +2,13 @@ var http = require('http'),
     faye = require('faye'),
     director = require('director');
 
+var AUTH_HEADER_NAME = 'X-RTAUTH';
+var RT_AUTH_HEADER = process.env.RT_AUTH_HEADER;
+if( !RT_AUTH_HEADER ) {
+  throw new Error( 'RT_AUTH_HEADER environmental variable not found.' +
+   'It is required in order for the server to authenticate incoming latency POSTs.' );
+}
+
 var SupportedChannelsExt = require( './SupportedChannelsExt' );
 
 var bayeux = new faye.NodeAdapter({mount: '/realtime', timeout: 45});
@@ -157,10 +164,14 @@ router.get( '/stats', function() {
 } );
 
 router.post( '/latency', function() {
-  // TODO: Authentication - use a header
-
+  var self = this;
   try {
-    var self = this;
+    var authHeader = this.req.headers[ AUTH_HEADER_NAME ];
+    if( authHeader !== RT_AUTH_HEADER ) {
+      self.res.writeHead( 401 );
+      self.res.end( 'Not authorized' );
+    }
+
     console.log( 'POST: Body: "%s"', JSON.stringify( this.req.body, null, 2 ) );
 
     var latencyResults = this.req.body.latencyResults;
