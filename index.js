@@ -166,7 +166,8 @@ router.get( '/stats', function() {
 router.post( '/latency', function() {
   var self = this;
   try {
-    var authHeader = this.req.headers[ AUTH_HEADER_NAME ];
+    console.log( 'headers', self.req.header );
+    var authHeader = self.req.headers[ AUTH_HEADER_NAME ];
     if( authHeader !== RT_AUTH_HEADER ) {
       self.res.writeHead( 401 );
       self.res.end( 'Not authorized: ' + authHeader );
