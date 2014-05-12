@@ -138,7 +138,12 @@ function publishResult( service, result ) {
 
   console.log( 'Publishing result for service "%s"', service );
 
-  bayeux.getClient().publish('/services/' + service, result );
+  var channel = '/services/' + service;
+  var message = {
+    data: result,
+    service: service
+  };
+  bayeux.getClient().publish( channel, message );
 }
 
 // HTTP

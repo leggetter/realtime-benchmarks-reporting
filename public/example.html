@@ -21,12 +21,12 @@
       </tr>
     </tbody>
   </table>
-        
-  
+
+
   <script src="http://cdnjs.cloudflare.com/ajax/libs/knockout/2.3.0/knockout-min.js"></script>
   <script src="http://realtime-latency-stats.herokuapp.com/realtime/client.js"></script>
   <script>
-    
+
     var Logger = {
         incoming: function(message, callback) {
         console.log('incoming', message);
@@ -37,7 +37,7 @@
         callback(message);
       }
     };
-    
+
     function average( arr ) {
       var i = arr.length,
       sum = 0;
@@ -46,9 +46,9 @@
       }
       return ( sum / arr.length );
     }
-    
+
     var LatencyViewModel = function() {
-      
+
       this.services = [
         'firebase',
         'goinstant',
@@ -64,7 +64,7 @@
           { name: service, latency: ko.observableArray( new Array( 5 ) ) }
         );
       } );
-      
+
       console.log( latencyResults );
 
       this.latencyResults = ko.observableArray( latencyResults );
@@ -80,21 +80,20 @@
         }
       }, this );
     };
-    
+
     var latencyViewModel = new LatencyViewModel();
     ko.applyBindings( latencyViewModel );
 
-    
+
     var client = new Faye.Client('http://realtime-latency-stats.herokuapp.com/realtime');
-    client.addExtension(Logger); 
-      
+    client.addExtension(Logger);
+
     function latencyResultReceived( message ) {
-      var channel = message.channel;
+      var service = message.service;
       var data = message.data;
-      var service = channel.substring( ( channel.lastIndexOf( '/' ) + 1 ) );
       latencyViewModel.updateLatency( service, data );
     }
-    
+
     var subscription = client.subscribe('/services/*', latencyResultReceived );
   </script>
 </body>
