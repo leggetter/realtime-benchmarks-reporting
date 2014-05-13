@@ -16,7 +16,7 @@
     <tr>
       <td>Service</td>
       <!-- ko foreach: latencyTimestamps -->
-      <td data-bind="text: $data"></td>
+      <td data-bind="fromNow: $data"></td>
       <!-- /ko -->
     </tr>
   </thead>
@@ -33,9 +33,29 @@
 
 
 <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-<script src="http://cdnjs.cloudflare.com/ajax/libs/knockout/2.3.0/knockout-min.js"></script>
+<script src="http://cdnjs.cloudflare.com/ajax/libs/knockout/3.1.0/knockout-min.js"></script>
 <script src="http://realtime-latency-stats.herokuapp.com/realtime/client.js"></script>
+<script src="http://cdnjs.cloudflare.com/ajax/libs/moment.js/2.6.0/moment.min.js"></script>
 <script>
+
+  ko.bindingHandlers.fromNow = {
+      update: function(element, valueAccessor, allBindingsAccessor, viewModel) {
+          var value = valueAccessor();
+          var valueUnwrapped = ko.utils.unwrapObservable(value);
+          $(element).text(moment( valueUnwrapped ).fromNow());
+      }
+  }
+
+  ko.extenders.timeFromNow = function(target, option) {
+    var result = ko.computed({
+        read: function() {
+          var value = target();
+          value = moment( value ).fromNow();
+        }
+    } );
+
+    return result;
+  };
 
   var Logger = {
     incoming: function(message, callback) {
@@ -62,6 +82,8 @@
     return ( sum / arr.length ).toFixed( 2 );
   }
 
+  var MAX_LATENCY_RESULTS = 10;
+
   var LatencyViewModel = function() {
 
     this.services = [
@@ -87,16 +109,26 @@
 
     this.latencyTimestamps = ko.observableArray();
   };
-  LatencyViewModel.prototype.updateLatency = function( service, data ) {
+  LatencyViewModel.prototype.updateLatency = function( message ) {
     Logger.log( arguments );
 
-    this.latencyTimestamps.unshift( data.timestamp );
+    var service = message.service;
+    var data = message.data;
+    var timestamp = message.timestamp;
+
+    var currentLatest = this.latencyTimestamps()[0];
+    if( currentLatest !== timestamp ) {
+      this.latencyTimestamps.unshift( timestamp );
+      if( this.latencyTimestamps().length > MAX_LATENCY_RESULTS ) {
+        this.latencyTimestamps.pop();
+      }
+    }
 
     ko.utils.arrayForEach( this.latencyResults(), function( result, index ) {
       if( result.name === service ) {
         result.latency.unshift( average( data ) );
         Logger.log( 'latency count:', result.latency().length )
-        if( result.latency().length > 10 ) {
+        if( result.latency().length > MAX_LATENCY_RESULTS ) {
           result.latency.pop();
         }
         Logger.log( result.latency );
@@ -109,9 +141,7 @@
   ko.applyBindings( latencyViewModel );
 
   function latencyResultReceived( message ) {
-    var service = message.service;
-    var data = message.data;
-    latencyViewModel.updateLatency( service, data );
+    latencyViewModel.updateLatency( message );
   }
 
   function cachedResults( data ) {

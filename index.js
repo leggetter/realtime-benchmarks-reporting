@@ -144,7 +144,7 @@ function publishResult( service, result, timestamp ) {
   var message = {
     data: result,
     service: service,
-    timestamp: timestamp || Date.now()
+    timestamp: timestamp
   };
   bayeux.getClient().publish( channel, message );
 }
@@ -172,8 +172,9 @@ router.post( '/latency', function() {
     // console.log( 'POST: Body: "%s"', JSON.stringify( this.req.body, null, 2 ) );
 
     var latencyResults = this.req.body.latencyResults;
+    var timestamp = this.req.body.timestamp || Date.now();
     for( var serviceName in latencyResults ) {
-      publishResult( serviceName.toLowerCase(), latencyResults[ serviceName ], this.req.body.timestamp );
+      publishResult( serviceName.toLowerCase(), latencyResults[ serviceName ], timestamp );
     }
 
     self.res.writeHead( 200 );
