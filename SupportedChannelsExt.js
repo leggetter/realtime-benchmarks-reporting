@@ -5,9 +5,9 @@ function SupportedChannelsExt( channels, options ) {
   this.channels = channels;
   this.options = options || {};
 
-  for( var o in optionDefaults ) {
-    if( this.options[ o ] === undefined ) {
-      this.options[ o ] = optionDefaults[ 0 ];
+  for( var opt in optionDefaults ) {
+    if( this.options[ opt ] === undefined ) {
+      this.options[ opt ] = optionDefaults[ opt ];
     }
   }
 }

@@ -66,11 +66,6 @@ function incrementSubscribe( serviceName ) {
 
 function decrementSubscribe( serviceName ) {
   if( !subscriptionCount[ serviceName ] ) {
-    console.error( 'unexpected unsubscribe. Channel "%s" not found in subscription list.', serviceName );
-    return;
-  }
-
-  if( !subscriptionCount[ serviceName ] ) {
     subscriptionCount[ serviceName ] = 0;
   }
   --subscriptionCount[ serviceName ];
@@ -137,7 +132,7 @@ bayeux.bind('disconnect', function(clientId) {
   console.log('[DISCONNECT] ' + clientId);
 } );
 
-function publishResult( service, result ) {
+function publishResult( service, result, timestamp ) {
   if( !knownServices[ service ] ) {
     console.error( 'Not publishing result for unknown service "%s"', service );
     return;
@@ -148,7 +143,8 @@ function publishResult( service, result ) {
   var channel = '/services/' + service;
   var message = {
     data: result,
-    service: service
+    service: service,
+    timestamp: timestamp
   };
   bayeux.getClient().publish( channel, message );
 }
@@ -177,7 +173,7 @@ router.post( '/latency', function() {
 
     var latencyResults = this.req.body.latencyResults;
     for( var serviceName in latencyResults ) {
-      publishResult( serviceName.toLowerCase(), latencyResults[ serviceName ] );
+      publishResult( serviceName.toLowerCase(), latencyResults[ serviceName ], this.req.body.timestamp );
     }
 
     self.res.writeHead( 200 );
