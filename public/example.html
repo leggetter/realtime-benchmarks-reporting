@@ -10,96 +10,133 @@
   </style>
 </head>
 <body>
-  <table id="results">
-    <thead>
-      <tr>
-        <td>Service</td>
-        <td colspan="5"></td>
-      </tr>
-    </thead>
-    <tbody data-bind="foreach: latencyResults">
-      <tr>
-        <td data-bind="text: name"></td>
-        <!-- ko foreach: latency -->
-          <td class="result" data-bind="text: $data"></td>
-        <!-- /ko -->
-      </tr>
-    </tbody>
-  </table>
+
+<table id="results">
+  <thead>
+    <tr>
+      <td>Service</td>
+      <!-- ko foreach: latencyTimestamps -->
+      <td data-bind="text: $data"></td>
+      <!-- /ko -->
+    </tr>
+  </thead>
+  <tbody data-bind="foreach: latencyResults">
+    <tr>
+      <td data-bind="text: name"></td>
+      <!-- ko foreach: latency -->
+      <td class="result" data-bind="text: $data"></td>
+      <!-- /ko -->
+    </tr>
+  </tbody>
+</table>
 
 
-  <script src="http://cdnjs.cloudflare.com/ajax/libs/knockout/2.3.0/knockout-min.js"></script>
-  <script src="http://realtime-latency-stats.herokuapp.com/realtime/client.js"></script>
-  <script>
 
-    var Logger = {
-        incoming: function(message, callback) {
-        console.log('incoming', message);
-        callback(message);
-      },
-      outgoing: function(message, callback) {
-        console.log('outgoing', message);
-        callback(message);
+<script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="http://cdnjs.cloudflare.com/ajax/libs/knockout/2.3.0/knockout-min.js"></script>
+<script src="http://realtime-latency-stats.herokuapp.com/realtime/client.js"></script>
+<script>
+
+  var Logger = {
+    incoming: function(message, callback) {
+      this.log('incoming', message);
+      callback(message);
+    },
+    outgoing: function(message, callback) {
+      this.log('outgoing', message);
+      callback(message);
+    },
+    log: function() {
+      if( window.console ) {
+        console.log( arguments )
       }
-    };
-
-    function average( arr ) {
-      var i = arr.length,
-      sum = 0;
-      while (i--) {
-        sum = sum + arr[i];
-      }
-      return ( sum / arr.length ).toFixed( 2 );
     }
+  };
 
-    var LatencyViewModel = function() {
+  function average( arr ) {
+    var i = arr.length,
+    sum = 0;
+    while (i--) {
+      sum = sum + arr[i];
+    }
+    return ( sum / arr.length ).toFixed( 2 );
+  }
 
-      this.services = [
-        'firebase',
-        'goinstant',
-        'hydna',
-        'pubnub',
-        'pusher',
-        'realtimeco'
-      ];
+  var LatencyViewModel = function() {
 
-      var latencyResults = [];
-      this.services.forEach( function( service ) {
-        latencyResults.push(
-          { name: service, latency: ko.observableArray( new Array( 5 ) ) }
-        );
-      } );
+    this.services = [
+      'firebase',
+      'goinstant',
+      'hydna',
+      'pubnub',
+      'pusher',
+      'realtimeco'
+    ];
 
-      console.log( latencyResults );
+    var latencyResults = [];
+    this.services.forEach( function( service ) {
+      latencyResults.push(
+        { name: service, latency: ko.observableArray() }
+      );
+    } );
 
-      this.latencyResults = ko.observableArray( latencyResults );
-      console.log( 'latencyResults', this.latencyResults.forEach );
-    };
-    LatencyViewModel.prototype.updateLatency = function( service, data ) {
-      console.log( arguments );
-      ko.utils.arrayForEach( this.latencyResults(), function( result, index ) {
-        if( result.name === service ) {
-          result.latency.push( average( data ) );
-          console.log( result.latency );
-          // TODO: restrict number of latency results
+    // console.log( latencyResults );
+
+    this.latencyResults = ko.observableArray( latencyResults );
+    Logger.log( 'latencyResults', this.latencyResults.forEach );
+
+    this.latencyTimestamps = ko.observableArray();
+  };
+  LatencyViewModel.prototype.updateLatency = function( service, data ) {
+    Logger.log( arguments );
+
+    this.latencyTimestamps.unshift( data.timestamp );
+
+    ko.utils.arrayForEach( this.latencyResults(), function( result, index ) {
+      if( result.name === service ) {
+        result.latency.unshift( average( data ) );
+        Logger.log( 'latency count:', result.latency().length )
+        if( result.latency().length > 10 ) {
+          result.latency.pop();
         }
-      }, this );
-    };
+        Logger.log( result.latency );
+        // TODO: restrict number of latency results
+      }
+    }, this );
+  };
 
-    var latencyViewModel = new LatencyViewModel();
-    ko.applyBindings( latencyViewModel );
+  var latencyViewModel = new LatencyViewModel();
+  ko.applyBindings( latencyViewModel );
 
+  function latencyResultReceived( message ) {
+    var service = message.service;
+    var data = message.data;
+    latencyViewModel.updateLatency( service, data );
+  }
 
+  function cachedResults( data ) {
+    data.forEach( publishCacheLatency );
+    addLiveData();
+  }
+
+  function publishCacheLatency( result ) {
+    var serviceResult;
+    for( var service in result.latencyResults ) {
+      serviceResult = result.latencyResults[ service ];
+      latencyViewModel.updateLatency( service.toLowerCase(), serviceResult );
+    }
+  }
+
+  function addLiveData() {
     var client = new Faye.Client('http://realtime-latency-stats.herokuapp.com/realtime');
     client.addExtension(Logger);
 
-    function latencyResultReceived( message ) {
-      var service = message.service;
-      var data = message.data;
-      latencyViewModel.updateLatency( service, data );
-    }
-
     var subscription = client.subscribe('/services/*', latencyResultReceived );
-  </script>
+  }
+
+  // jQuery.getJSON( 'http://www.leggetter.co.uk/realtime_benchmarks/results.php', cachedResults );
+  addLiveData();
+
+</script>
 </body>
 </html>

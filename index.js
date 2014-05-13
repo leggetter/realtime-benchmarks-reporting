@@ -144,7 +144,7 @@ function publishResult( service, result, timestamp ) {
   var message = {
     data: result,
     service: service,
-    timestamp: timestamp
+    timestamp: timestamp || Date.now()
   };
   bayeux.getClient().publish( channel, message );
 }
