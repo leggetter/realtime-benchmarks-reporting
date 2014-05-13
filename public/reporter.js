@@ -57,8 +57,6 @@ var LatencyViewModel = function() {
     );
   } );
 
-  // console.log( latencyResults );
-
   this.latencyResults = ko.observableArray( latencyResults );
   Logger.log( 'latencyResults', this.latencyResults.forEach );
 
