@@ -2,7 +2,7 @@
   text-align: right;
 }
 
-.latency-results.service-name {
+.latency-results .service-name {
   font-weight: bold;
 }
 
