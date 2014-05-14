@@ -138,7 +138,7 @@ LatencyReport.prototype.addLiveData = function() {
 
   var self = this;
   var subscription = client.subscribe('/services/*', function() {
-    self.latencyResultReceived.apply( self, argments );
+    self.latencyResultReceived.apply( self, arguments );
   } );
 };
 
