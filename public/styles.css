@@ -1,3 +1,7 @@
+.latency-results thead {
+  font-style: italic;
+}
+
 .latency-results td.result {
   text-align: right;
 }
