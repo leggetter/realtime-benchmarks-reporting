@@ -1,3 +1,4 @@
+// Knockout bindings for the latency stats table
 ko.bindingHandlers.fromNow = {
     update: function(element, valueAccessor, allBindingsAccessor, viewModel) {
         var value = valueAccessor();
@@ -12,6 +13,7 @@ ko.bindingHandlers.flash = {
     }
 };
 
+// Logger for the Faye client
 var Logger = {
   incoming: function(message, callback) {
     this.log('incoming', message);
@@ -23,7 +25,7 @@ var Logger = {
   },
   log: function() {
     if( window.console ) {
-      console.log( arguments )
+      console.log( arguments );
     }
   }
 };
@@ -39,6 +41,7 @@ function average( arr ) {
 
 var MAX_LATENCY_RESULTS = 7;
 
+// Knockout View Model for latency results
 var LatencyViewModel = function() {
 
   this.services = [
@@ -52,16 +55,17 @@ var LatencyViewModel = function() {
 
   var latencyResults = [];
   this.services.forEach( function( service ) {
-    latencyResults.push(
-      { name: service, latency: ko.observableArray() }
-    );
+    latencyResults.push( {
+      name: service,
+      latency: ko.observableArray()
+    } );
   } );
 
   this.latencyResults = ko.observableArray( latencyResults );
-  Logger.log( 'latencyResults', this.latencyResults.forEach );
 
   this.latencyTimestamps = ko.observableArray();
 };
+
 LatencyViewModel.prototype.updateLatency = function( message ) {
   Logger.log( arguments );
 
@@ -81,35 +85,40 @@ LatencyViewModel.prototype.updateLatency = function( message ) {
   ko.utils.arrayForEach( this.latencyResults(), function( result, index ) {
     if( result.name === service ) {
       result.latency.unshift( average( data ) );
-      Logger.log( 'latency count:', result.latency().length )
+      Logger.log( 'latency count:', result.latency().length );
       if( result.latency().length > MAX_LATENCY_RESULTS ) {
         result.latency.pop();
       }
-      Logger.log( result.latency );
-      // TODO: restrict number of latency results
     }
   }, this );
 };
 
-var latencyViewModel = new LatencyViewModel();
-ko.applyBindings( latencyViewModel );
+// Domain model for the latency report
+function LatencyReport( viewModel, $ ) {
+  var self = this;
+  self._viewModel = viewModel;
 
-function latencyResultReceived( message ) {
-  latencyViewModel.updateLatency( message );
+  $.getJSON( 'http://www.leggetter.co.uk/realtime_benchmarks/results.php', function() {
+    self.cachedResults.apply( self, arguments );
+  } );
 }
 
-function cachedResults( data ) {
+LatencyReport.prototype.latencyResultReceived = function( message ) {
+  this._viewModel.updateLatency( message );
+};
+
+LatencyReport.prototype.cachedResults = function( data ) {
   var i = data.length,
       result;
   while( i > 0 ) {
     --i;
     result = data[ i ];
-    publishCacheLatency( result );
+    this.publishCacheLatency( result );
   }
-  addLiveData();
-}
+  this.addLiveData();
+};
 
-function publishCacheLatency( result ) {
+LatencyReport.prototype.publishCacheLatency = function( result ) {
   var data,
       message;
   for( var service in result.latencyResults ) {
@@ -119,15 +128,22 @@ function publishCacheLatency( result ) {
       data: data,
       timestamp: result.timestamp
     };
-    latencyViewModel.updateLatency( message );
+    this._viewModel.updateLatency( message );
   }
-}
+};
 
-function addLiveData() {
+LatencyReport.prototype.addLiveData = function() {
   var client = new Faye.Client('http://realtime-latency-stats.herokuapp.com/realtime');
   client.addExtension(Logger);
 
-  var subscription = client.subscribe('/services/*', latencyResultReceived );
-}
+  var self = this;
+  var subscription = client.subscribe('/services/*', function() {
+    self.latencyResultReceived.apply( self, argments );
+  } );
+};
 
-jQuery.getJSON( 'http://www.leggetter.co.uk/realtime_benchmarks/results.php', cachedResults );
+// Create View Model and bind
+var latencyViewModel = new LatencyViewModel();
+ko.applyBindings( latencyViewModel );
+
+new LatencyReport( latencyViewModel, jQuery );
