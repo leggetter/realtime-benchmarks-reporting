@@ -12,7 +12,7 @@
 <table id="results" class="latency-results">
   <thead>
     <tr>
-      <td></td>
+      <td>Result time</td>
       <!-- ko foreach: latencyTimestamps -->
       <td data-bind="fromNow: $data, flash"></td>
       <!-- /ko -->
@@ -27,6 +27,7 @@
     </tr>
   </tbody>
 </table>
+<small>Latency times in milliseconds. *NaN* results indicate that the benchmark did not complete.</small>
 
 <script src="//cdnjs.cloudflare.com/ajax/libs/headjs/1.0.3/head.min.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.js"></script>
