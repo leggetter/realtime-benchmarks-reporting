@@ -35,6 +35,7 @@ var knownServices = {
   'pubnub' : {},
   'realtimeco' : {},
   'firebase' : {},
+  'fanout' : {},
   'hydna' : {},
   'goinstant': {}
 };
