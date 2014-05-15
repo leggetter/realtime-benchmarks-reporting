@@ -45,18 +45,20 @@ var MAX_LATENCY_RESULTS = 7;
 var LatencyViewModel = function() {
 
   this.services = [
-    'firebase',
-    'goinstant',
-    'hydna',
-    'pubnub',
-    'pusher',
-    'realtimeco'
+    { serviceId: 'fanout', displayName: 'Fanout', url: 'http://fanout.io' },
+    { serviceId: 'firebase', displayName: 'Firebase', url: 'http://firebase.com' },
+    { serviceId: 'goinstant', displayName: 'GoInstant', url: 'http://goinstant.com' },
+    { serviceId: 'hydna', displayName: 'Hydan', url: 'http://hydna.com' },
+    { serviceId: 'pubnub', displayName: 'PubNub', url: 'http://pubnub.com' },
+    { serviceId: 'pusher', displayName: 'Pusher', url: 'http://pusher.com' },
+    { serviceId: 'realtimeco', displayName: 'Realtime.co', url: 'http://realtime.co' }
   ];
 
   var latencyResults = [];
   this.services.forEach( function( service ) {
     latencyResults.push( {
-      name: service,
+      name: service.serviceId,
+      info: service,
       latency: ko.observableArray()
     } );
   } );

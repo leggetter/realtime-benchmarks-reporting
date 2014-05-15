@@ -20,7 +20,9 @@
   </thead>
   <tbody data-bind="foreach: latencyResults">
     <tr>
-      <td data-bind="text: name" class="service-name"></td>
+      <td class="service-name">
+        <a data-bind="attr: {href:info.url}, text: info.displayName"></a>
+      </td>
       <!-- ko foreach: latency -->
       <td class="result" data-bind="text: $data, flash"></td>
       <!-- /ko -->
