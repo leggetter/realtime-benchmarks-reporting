@@ -65,7 +65,7 @@ var LatencyViewModel = function() {
     { serviceId: 'fanout', displayName: 'Fanout', url: 'http://fanout.io' },
     { serviceId: 'firebase', displayName: 'Firebase', url: 'http://firebase.com' },
     { serviceId: 'goinstant', displayName: 'GoInstant', url: 'http://goinstant.com' },
-    { serviceId: 'hydna', displayName: 'Hydan', url: 'http://hydna.com' },
+    { serviceId: 'hydna', displayName: 'Hydna', url: 'http://hydna.com' },
     { serviceId: 'pubnub', displayName: 'PubNub', url: 'http://pubnub.com' },
     { serviceId: 'pusher', displayName: 'Pusher', url: 'http://pusher.com' },
     { serviceId: 'realtimeco', displayName: 'Realtime.co', url: 'http://realtime.co' }
