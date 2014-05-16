@@ -39,7 +39,7 @@ function average( arr ) {
   return ( sum / arr.length ).toFixed( 2 );
 }
 
-var MAX_LATENCY_RESULTS = 7;
+var MAX_LATENCY_RESULTS = 6;
 
 function ServiceViewModel( service ) {
   this.name = service.serviceId;
