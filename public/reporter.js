@@ -34,12 +34,29 @@ function average( arr ) {
   var i = arr.length,
   sum = 0;
   while (i--) {
-    sum = sum + arr[i];
+    sum = sum + parseInt( arr[i], 10 );
   }
   return ( sum / arr.length ).toFixed( 2 );
 }
 
 var MAX_LATENCY_RESULTS = 7;
+
+function ServiceViewModel( service ) {
+  this.name = service.serviceId;
+  this.info = service;
+  this.latency = ko.observableArray(),
+  this.avg = ko.computed( this._calcAvg, this );
+}
+
+ServiceViewModel.prototype._calcAvg = function() {
+  var values = this.latency();
+  var displayAvg = '-';
+  var avg = average( values );
+  if( !isNaN( avg ) ) {
+    displayAvg = avg;
+  }
+  return displayAvg;
+};
 
 // Knockout View Model for latency results
 var LatencyViewModel = function() {
@@ -56,11 +73,7 @@ var LatencyViewModel = function() {
 
   var latencyResults = [];
   this.services.forEach( function( service ) {
-    latencyResults.push( {
-      name: service.serviceId,
-      info: service,
-      latency: ko.observableArray()
-    } );
+    latencyResults.push( new ServiceViewModel( service ) );
   } );
 
   this.latencyResults = ko.observableArray( latencyResults );

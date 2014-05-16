@@ -12,7 +12,13 @@
 <table id="results" class="latency-results">
   <thead>
     <tr>
-      <td>Result time</td>
+      <td class="times-label" colspan="9">
+        Time of results
+      </td>
+    </tr>
+    <tr>
+      <td>Service</td>
+      <td>Avg.</td>
       <!-- ko foreach: latencyTimestamps -->
       <td data-bind="fromNow: $data, flash"></td>
       <!-- /ko -->
@@ -23,6 +29,7 @@
       <td class="service-name">
         <a data-bind="attr: {href:info.url}, text: info.displayName"></a>
       </td>
+      <td class="avg-service-latency" data-bind="text:avg"></td>
       <!-- ko foreach: latency -->
       <td class="result" data-bind="text: $data, flash"></td>
       <!-- /ko -->
