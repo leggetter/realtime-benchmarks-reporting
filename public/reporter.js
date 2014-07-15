@@ -15,6 +15,8 @@ ko.bindingHandlers.flash = {
 
 // Logger for the Faye client
 var Logger = {
+  logToConsole: false,
+
   incoming: function(message, callback) {
     this.log('incoming', message);
     callback(message);
@@ -24,7 +26,7 @@ var Logger = {
     callback(message);
   },
   log: function() {
-    if( window.console ) {
+    if( this.logToConsole && window.console ) {
       console.log( arguments );
     }
   }
