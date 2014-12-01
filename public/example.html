@@ -20,7 +20,7 @@
       <td>Service</td>
       <td>Avg.</td>
       <!-- ko foreach: latencyTimestamps -->
-      <td data-bind="fromNow: $data, flash"></td>
+      <td class="result-time" data-bind="fromNow: $data, flash"></td>
       <!-- /ko -->
     </tr>
   </thead>
@@ -36,6 +36,7 @@
     </tr>
   </tbody>
 </table>
+
 <small>Latency times in milliseconds. *NaN* results indicate that the benchmark did not complete.</small>
 
 <script src="//cdnjs.cloudflare.com/ajax/libs/headjs/1.0.3/head.min.js"></script>

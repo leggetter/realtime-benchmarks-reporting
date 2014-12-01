@@ -22,6 +22,7 @@
   border-bottom: 1px solid #464646;
 }
 
+.latency-results td.result-time,
 .latency-results td.result {
   text-align: right;
 }
