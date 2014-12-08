@@ -114,7 +114,7 @@ function LatencyReport( viewModel, $ ) {
   var self = this;
   self._viewModel = viewModel;
 
-  $.getJSON( 'http://www.leggetter.co.uk/realtime_benchmarks/results.php', function() {
+  $.getJSON( 'http://phobos7.co.uk/leggetter/realtime_benchmarks/results.php', function() {
     self.cachedResults.apply( self, arguments );
   } );
 }
