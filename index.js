@@ -36,7 +36,8 @@ var knownServices = {
   'realtimeco' : {},
   'firebase' : {},
   'fanout' : {},
-  'hydna' : {}
+  'hydna' : {},
+  'datamcfly' : {}
 };
 
 var servicesChannelPrefix = '/services/';

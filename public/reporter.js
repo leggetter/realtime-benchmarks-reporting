@@ -69,7 +69,8 @@ var LatencyViewModel = function() {
     { serviceId: 'hydna', displayName: 'Hydna', url: 'http://hydna.com' },
     { serviceId: 'pubnub', displayName: 'PubNub', url: 'http://pubnub.com' },
     { serviceId: 'pusher', displayName: 'Pusher', url: 'http://pusher.com' },
-    { serviceId: 'realtimeco', displayName: 'Realtime.co', url: 'http://realtime.co' }
+    { serviceId: 'realtimeco', displayName: 'Realtime.co', url: 'http://realtime.co' },
+    { serviceId: 'datamcfly', displayName: 'DataMcFly', url: 'http://datamcfly.com' }
   ];
 
   var latencyResults = [];
