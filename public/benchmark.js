@@ -14,7 +14,7 @@
 
 	function init() {
 		Pusher.channel_auth_endpoint = BENCHMARKS_SERVER + '/pusher-auth';
-		// setTimeout( runBenchmark, 0 );
+		setTimeout( runBenchmark, 0 );
 	}
 
 	function log( msg ) {
