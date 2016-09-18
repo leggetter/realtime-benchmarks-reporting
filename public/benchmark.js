@@ -9,7 +9,7 @@
 				'https://cdnjs.cloudflare.com/ajax/libs/hydna/1.0.1/hydna.min.js',
 				'https://d7d63e3a.fanoutcdn.com/bayeux/static/faye-browser-min.js',
 				'https://cdn.datamcfly.com/DataMcFly.js',
-				'/realtime_benchmarks/realtime-benchmarks.min.js',
+				BENCHMARKS_SERVER + '/realtime-benchmarks.min.js',
 				init );
 
 	function init() {
@@ -96,7 +96,7 @@
 		}
 
 		var runner = new BenchmarkRunner( services, {
-			logToConsole: false,
+			logToConsole: true,
 			completed: function( results ) {
 
 				var postData = {
@@ -109,8 +109,7 @@
 					jQuery.ajax( {
 						url: BENCHMARKS_SERVER + '/results?' + (new Date().getTime()).toString(),
 						type: 'post',
-						data: JSON.stringify( postData ),
-						dataType: 'json',
+						data: JSON.stringify(postData),
 						success: function( data ) {
 							postData.id = data.id;
 							result = postData;

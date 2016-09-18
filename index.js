@@ -7,7 +7,7 @@ var http = require('http'),
     
 var app = express();
 app.use(express.static('public'));
-app.use(bodyParser.json());
+// app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(cors());
 
@@ -206,13 +206,16 @@ app.get('/results', function(req, res) {
 });
 
 app.post('/results', function(req, res) {
-  var body = req.body;
+  console.log(req.body);
+  var result = JSON.parse(Object.keys(req.body)[0]);
+  console.log(result);
     
   request({
-    url: 'http://phobos7.co.uk/leggetter/realtime_benchmarks/results.php',
+    url: 'http://phobos7.co.uk/leggetter/realtime_benchmarks/',
     method: 'POST',
-    data: body
+    json: result
   }, function(err, resp, resultBody) {
+    console.log('index body:', resultBody);
     if(err) {
       res.writeHead(500);
     }
