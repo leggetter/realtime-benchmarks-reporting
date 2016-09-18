@@ -1,3 +1,6 @@
+var BENCHMARK_SERVER = 'https://realtime-latency-stats.herokuapp.com';
+// var BENCHMARK_SERVER = 'http://localhost:5000';
+
 // Knockout bindings for the latency stats table
 ko.bindingHandlers.fromNow = {
     update: function(element, valueAccessor, allBindingsAccessor, viewModel) {
@@ -115,7 +118,7 @@ function LatencyReport( viewModel, $ ) {
   var self = this;
   self._viewModel = viewModel;
 
-  $.getJSON( 'http://phobos7.co.uk/leggetter/realtime_benchmarks/results.php', function() {
+  $.getJSON( BENCHMARK_SERVER + '/results', function() {
     self.cachedResults.apply( self, arguments );
   } );
 }
@@ -150,7 +153,7 @@ LatencyReport.prototype.publishCacheLatency = function( result ) {
 };
 
 LatencyReport.prototype.addLiveData = function() {
-  var client = new Faye.Client('http://realtime-latency-stats.herokuapp.com/realtime');
+  var client = new Faye.Client(BENCHMARK_SERVER + '/realtime');
   client.addExtension(Logger);
 
   var self = this;
